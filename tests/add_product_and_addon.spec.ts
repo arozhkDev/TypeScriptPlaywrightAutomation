@@ -15,7 +15,6 @@ test('has title', async ({ page }) => {
   let licenseTitle: string | null = null;
   let licensePrice: number | null = null;
   let licenseProratedPrice: number | null = null;
-
   let totalLicensePrice: number = 0;
 
   const addonCards: Locator[] = [];
@@ -28,21 +27,20 @@ test('has title', async ({ page }) => {
   const reviewPage = new ReviewPage(page);
   const checkoutPage = new CheckoutPage(page);
 
-  await test.step('Navigate to licenses page', async () => {
+  await test.step('Navigate to licenses page and verify log in', async () => {
     await page.goto(licensesUrl);
     await page.waitForLoadState('networkidle');
     await page.waitForLoadState('domcontentloaded');
-  });
 
-  licensesPage.verifyIsNotLoggedIn();
+    licensesPage.verifyIsNotLoggedIn();
+  });
 
   await test.step('Select license card and its data', async () => {
     await licensesPage.getPageTitleLocator().first().focus();
     const licenseCards = await licensesPage.getLicenseCardsLocator().all();
-
     const licenseCard = getRandomElement(licenseCards);
-    assert(licenseCard);
 
+    assert(licenseCard);
     licenseTitle = await licensesPage
       .getLicenseCardHeaderLocator(licenseCard)
       .innerText();
@@ -66,8 +64,8 @@ test('has title', async ({ page }) => {
   await test.step('Select addon and get its data', async () => {
     await configurePage.getPageTitleLocator().first().focus();
     const addons = await configurePage.getAddonsLocator().all();
-
     const addon = getRandomElement(addons);
+
     if (!addon) {
       return;
     }
@@ -106,7 +104,6 @@ test('has title', async ({ page }) => {
     expect(productCards.length).toEqual(1 + addonTitles.length);
 
     assert(licenseTitle);
-
     licenseCard = await reviewPage.findProductCardByTitle(
       productCards,
       licenseTitle
@@ -120,19 +117,18 @@ test('has title', async ({ page }) => {
         addonTitle
       );
       expect(addonCard).toBeDefined();
+
       assert(addonCard);
       addonCards.push(addonCard);
     }
   });
 
   await test.step('Verify product prices are correct and prorated', async () => {
-    assert(licenseTitle);
     assert(licensePrice);
-    assert(licenseCard);
-
     totalLicensePrice =
       addonPrices.reduce((acc, i) => acc + i, 0) + licensePrice;
 
+    assert(licenseCard);
     await expect(
       reviewPage.getProductMonthlyPriceLocator(
         licenseCard,
@@ -184,7 +180,6 @@ test('has title', async ({ page }) => {
 
   await test.step('Verify checkout information', async () => {
     await checkoutPage.getTableLocator().first().focus();
-
     const orderSummary = await checkoutPage.getTableLocator().all();
 
     expect(orderSummary.length).toEqual(1 + addonTitles.length);
@@ -194,14 +189,15 @@ test('has title', async ({ page }) => {
       orderSummary,
       licenseTitle
     );
+    
     expect(licenseCard).toBeDefined();
+
     assert(licenseCard);
     expect(
       checkoutPage.getIpAddressLocator(licenseCard, ipAddress)
     ).toBeVisible();
 
     assert(totalLicensePrice);
-
     expect(
       checkoutPage.getPriceLocator(licenseCard, formatNumber(totalLicensePrice))
     ).toBeVisible();
