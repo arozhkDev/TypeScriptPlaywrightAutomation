@@ -10,7 +10,7 @@ import { CheckoutPage } from '../src/page_object/checkout_page';
 import { ipAddress } from '../src/test_parameters/add_product_and_addon';
 import assert from 'assert';
 
-test('has title', async ({ page }) => {
+test('Add product and addon', async ({ page }) => {
   let licenseCard: Locator | null = null;
   let licenseTitle: string | null = null;
   let licensePrice: number | null = null;
